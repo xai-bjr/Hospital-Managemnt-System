@@ -1,0 +1,214 @@
+{% extends 'patients/base.html' %}
+
+{% block content %}
+
+<h2>Dashboard Overview</h2>
+<p>If you can see this, it is working!</p>
+
+<!-- Key Metrics Row -->
+
+
+<div class="d-flex justify-content-between align-items-center mb-4"> <div> <h2>Dashboard Overview</h2> <p class="text-muted mb-0">Hospital Management System Control Panel</p> </div> </div> <!-- Key Metrics Row --> <div class="row mb-4">
+<!-- Revenue -->
+<div class="col-xl-3 col-md-6 mb-4">
+    <div class="card bg-success text-white h-100 py-2 shadow-sm">
+        <div class="card-body d-flex justify-content-between align-items-center">
+            <div>
+                <div class="text-uppercase fw-bold text-xs mb-1">
+                    Total Revenue
+                </div>
+                <div class="h3 mb-0 fw-bold">
+                    ${{ total_revenue|default:"0.00" }}
+                </div>
+            </div>
+            <i class="fas fa-dollar-sign metric-icon"></i>
+        </div>
+    </div>
+</div>
+
+<!-- Beds -->
+<div class="col-xl-3 col-md-6 mb-4">
+    <div class="card bg-info text-white h-100 py-2 shadow-sm">
+        <div class="card-body d-flex justify-content-between align-items-center">
+            <div>
+                <div class="text-uppercase fw-bold text-xs mb-1">
+                    Bed Occupancy
+                </div>
+                <div class="h3 mb-0 fw-bold">
+                    {{ bed_occupancy_rate|default:"0" }}%
+                </div>
+                <small>
+                    {{ available_beds|default:"0" }} beds available
+                </small>
+            </div>
+            <i class="fas fa-procedures metric-icon"></i>
+        </div>
+    </div>
+</div>
+
+<!-- Appointments -->
+<div class="col-xl-3 col-md-6 mb-4">
+    <div class="card bg-warning text-dark h-100 py-2 shadow-sm">
+        <div class="card-body d-flex justify-content-between align-items-center">
+            <div>
+                <div class="text-uppercase fw-bold text-xs mb-1">
+                    Pending Appointments
+                </div>
+                <div class="h3 mb-0 fw-bold">
+                    {{ pending_appointments|default:"0" }}
+                </div>
+            </div>
+            <i class="fas fa-calendar metric-icon text-dark"></i>
+        </div>
+    </div>
+</div>
+
+<!-- Patients -->
+<div class="col-xl-3 col-md-6 mb-4">
+    <div class="card bg-primary text-white h-100 py-2 shadow-sm">
+        <div class="card-body d-flex justify-content-between align-items-center">
+            <div>
+                <div class="text-uppercase fw-bold text-xs mb-1">
+                    Active Patients
+                </div>
+                <div class="h3 mb-0 fw-bold">
+                    {{ total_patients|default:"0" }}
+                </div>
+            </div>
+            <i class="fas fa-users metric-icon"></i>
+        </div>
+    </div>
+</div>
+
+</div> <!-- Main Dashboard --> <div class="row">
+<!-- Recent Admissions -->
+<div class="col-lg-8 mb-4">
+    <div class="card h-100 shadow-sm">
+
+        <div class="card-header bg-white fw-bold py-3">
+            <i class="fas fa-table me-2 text-primary"></i>
+            Recent Admissions
+        </div>
+
+        <div class="card-body">
+
+            <div class="table-responsive">
+
+                <table class="table table-hover align-middle mb-0">
+
+                    <thead class="table-light">
+                        <tr>
+                            <th>Patient Name</th>
+                            <th>Bed/Ward</th>
+                            <th>Admission Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        {% for patient in recent_patients %}
+
+                        <tr>
+
+                            <td>
+                                <div class="fw-bold">
+                                    {{ patient.first_name }} {{ patient.last_name }}
+                                </div>
+
+                                <small class="text-muted">
+                                    Blood:
+                                    {{ patient.blood_group|default:"N/A" }}
+                                    |
+                                    ID: #{{ patient.id }}
+                                </small>
+                            </td>
+
+                            <td>
+
+                                {% if patient.assigned_bed %}
+
+                                <span class="badge bg-secondary">
+                                    {{ patient.assigned_bed }}
+                                </span>
+
+                                {% else %}
+
+                                <span class="badge bg-light text-dark border">
+                                    Outpatient
+                                </span>
+
+                                {% endif %}
+
+                            </td>
+
+                            <td>
+                                {{ patient.admission_date|date:"M d, Y" }}
+                            </td>
+
+                            <td>
+
+                                <a href="{% url 'webgl_viewer' patient.id %}"
+                                   class="btn btn-sm btn-outline-info"
+                                   title="3D Viewer">
+                                    <i class="fas fa-cube"></i>
+                                </a>
+
+                                <a href="{% url 'discharge_pdf' patient.id %}"
+                                   class="btn btn-sm btn-outline-danger"
+                                   title="Discharge PDF">
+                                    <i class="fas fa-file-pdf"></i>
+                                </a>
+
+                            </td>
+
+                        </tr>
+
+                        {% empty %}
+
+                        <tr>
+                            <td colspan="4"
+                                class="text-center text-muted py-4">
+                                No patients currently in the system.
+                                Go to Admin to add data.
+                            </td>
+                        </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+<!-- Resource Allocation -->
+<div class="col-lg-4 mb-4">
+
+    <div class="card h-100 shadow-sm">
+
+        <div class="card-header bg-white fw-bold py-3">
+            <i class="fas fa-chart-pie me-2 text-primary"></i>
+            Resource Allocation
+        </div>
+
+        <div class="card-body">
+
+            <div style="position: relative; height: 300px; width: 100%;">
+                <canvas id="resourceChart"></canvas>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+</div> <script> document.addEventListener("DOMContentLoaded", function () { const canvas = document.getElementById("resourceChart"); if (!canvas) { return; } const ctx = canvas.getContext("2d"); const occupiedBeds = parseFloat("{{ bed_occupancy_rate|default:'0' }}") || 0; const availableBeds = parseInt("{{ available_beds|default:'0' }}") || 0; const activeDoctors = parseInt("{{ active_doctors|default:'0' }}") || 0; new Chart(ctx, { type: "doughnut", data: { labels: [ "Occupied Beds %", "Available Beds", "Doctors on Duty" ], datasets: [{ data: [ occupiedBeds, availableBeds, activeDoctors ], backgroundColor: [ "#17a2b8", "#e9ecef", "#28a745" ], hoverBackgroundColor: [ "#138496", "#ced4da", "#218838" ] }] }, options: { maintainAspectRatio: false, responsive: true, cutout: "70%", plugins: { legend: { position: "bottom" } } } }); }); </script>
+
+{% endblock %}

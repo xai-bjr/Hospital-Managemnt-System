@@ -1,0 +1,16 @@
+{% extends 'patients/base.html' %}
+{% block content %}
+<div class="card mx-auto" style="max-width: 600px;">
+    <div class="card-header bg-primary text-white">
+        <h4>{% if form.instance.pk %}Edit{% else %}Register{% endif %} Patient</h4>
+    </div>
+    <div class="card-body">
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" class="btn btn-success">Save</button>
+            <a href="{% url 'patient_list' %}" class="btn btn-secondary">Cancel</a>
+        </form>
+    </div>
+</div>
+{% endblock %}
